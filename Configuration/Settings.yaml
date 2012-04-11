@@ -1,0 +1,9 @@
+TYPO3:
+  Jobqueue:
+    Beanstalkd:
+      testing:
+        # Set to TRUE to enable functional testing against a beanstalkd server
+        # enabled: TRUE
+        client:
+          hostname: 127.0.0.1
+          port: 11300
