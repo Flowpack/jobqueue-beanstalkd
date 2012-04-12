@@ -1,8 +1,8 @@
 <?php
-namespace TYPO3\Jobqueue\Redis\Tests\Functional\Queue;
+namespace TYPO3\Jobqueue\Beanstalkd\Tests\Functional\Queue;
 
 /*                                                                        *
- * This script belongs to the FLOW3 package "Jobqueue.Redis".                *
+ * This script belongs to the FLOW3 package "Jobqueue.Beanstalkd".                *
  *                                                                        *
  * It is free software; you can redistribute it and/or modify it under    *
  * the terms of the GNU General Public License, either version 3 of the   *
@@ -17,9 +17,14 @@ namespace TYPO3\Jobqueue\Redis\Tests\Functional\Queue;
 class BeanstalkdQueueTest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
 
 	/**
-	 * @var \TYPO3\Jobqueue\Redis\Queue\BeanstalkdQueue
+	 * @var \TYPO3\Jobqueue\Beanstalkd\Queue\BeanstalkdQueue
 	 */
 	protected $queue;
+
+	/**
+	 * @var \Pheanstalk\Pheanstalk
+	 */
+	protected $pheanstalk;
 
 	/**
 	 * Set up dependencies
@@ -32,12 +37,13 @@ class BeanstalkdQueueTest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
 			$this->markTestSkipped('beanstalkd is not configured');
 		}
 
-		$this->queue = new \TYPO3\Jobqueue\Redis\Queue\BeanstalkdQueue('Test queue', $settings['testing']);
+		$this->queue = new \TYPO3\Jobqueue\Beanstalkd\Queue\BeanstalkdQueue('Test queue', $settings['testing']);
 
 		$clientOptions = $settings['testing']['client'];
 		$host = isset($clientOptions['host']) ? $clientOptions['host'] : '127.0.0.1';
-		$port = isset($clientOptions['host']) ? $clientOptions['host'] : '127.0.0.1';
-		$client = new \Pheanstalk\Pheanstalk($host, $port);
+		$port = isset($clientOptions['port']) ? $clientOptions['port'] : '11300';
+		$this->pheanstalk = new \Pheanstalk\Pheanstalk($host, $port);
+
 			// flush queue:
 		try {
 			while (true) {
@@ -85,24 +91,6 @@ class BeanstalkdQueueTest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
 	/**
 	 * @test
 	 */
-	public function identifierMakesMessagesUnique() {
-		$message = new \TYPO3\Jobqueue\Common\Queue\Message('Yeah, tell someone it works!', 'test.message');
-		$identicalMessage = new \TYPO3\Jobqueue\Common\Queue\Message('Yeah, tell someone it works!', 'test.message');
-		$this->queue->publish($message);
-		$this->queue->publish($identicalMessage);
-
-		$this->assertEquals(\TYPO3\Jobqueue\Common\Queue\Message::STATE_NEW, $identicalMessage->getState());
-
-		$result = $this->queue->waitAndTake(1);
-		$this->assertNotNull($result, 'wait should receive message');
-
-		$result = $this->queue->waitAndTake(1);
-		$this->assertNull($result, 'message should not be queued twice');
-	}
-
-	/**
-	 * @test
-	 */
 	public function peekReturnsNextMessagesIfQueueHasMessages() {
 		$message = new \TYPO3\Jobqueue\Common\Queue\Message('First message');
 		$this->queue->publish($message);
@@ -113,7 +101,7 @@ class BeanstalkdQueueTest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
 		$this->assertEquals(1, count($results), 'peek should return a message');
 		$result = $results[0];
 		$this->assertEquals('First message', $result->getPayload());
-		$this->assertEquals(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED, $result->getState());
+		$this->assertEquals(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED, $result->getState(), 'Message state should be published');
 
 		$results = $this->queue->peek(1);
 		$this->assertEquals(1, count($results), 'peek should return a message again');
@@ -144,7 +132,7 @@ class BeanstalkdQueueTest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
 		$this->assertEquals(array(), $result, 'no message should be present in queue');
 
 		$finishResult = $this->queue->finish($message);
-		$this->assertTrue($finishResult);
+		$this->assertTrue($finishResult, 'message should be finished');
 	}
 
 }

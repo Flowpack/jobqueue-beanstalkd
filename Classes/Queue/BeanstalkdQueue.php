@@ -1,5 +1,5 @@
 <?php
-namespace TYPO3\Jobqueue\Redis\Queue;
+namespace TYPO3\Jobqueue\Beanstalkd\Queue;
 
 use TYPO3\FLOW3\Package\Package as BasePackage;
 use TYPO3\FLOW3\Annotations as FLOW3;
@@ -67,7 +67,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	public function waitAndTake($timeout = NULL) {
 		$timeout !== NULL ? $timeout : $this->defaultTimeout;
 		$pheanstalkJob = $this->client->reserve($timeout);
-		if ($pheanstalkJob === NULL) {
+		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
 			return NULL;
 		}
 		$message = $this->decodeMessage($pheanstalkJob->getData());
@@ -91,12 +91,12 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 */
 	public function waitAndReserve($timeout = NULL) {
 		$timeout !== NULL ? $timeout : $this->defaultTimeout;
-		$pheanstalkJobs = $this->client->reserve($timeout);
-		if ($pheanstalkJobs === NULL) {
+		$pheanstalkJob = $this->client->reserve($timeout);
+		if ($pheanstalkJob === NULL) {
 			return NULL;
 		}
-		$message = $this->decodeMessage($pheanstalkJobs->getData());
-		$message->setIdentifier($pheanstalkJobs->getId());
+		$message = $this->decodeMessage($pheanstalkJob->getData());
+		$message->setIdentifier($pheanstalkJob->getId());
 		return $message;
 	}
 
@@ -111,6 +111,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 		$pheanstalkJob = $this->client->peek($messageIdentifier);
 		$this->client->delete($pheanstalkJob);
 		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_DONE);
+		return TRUE;
 	}
 
 	/**
@@ -120,7 +121,23 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * @return array Messages or empty array if no messages were present
 	 */
 	public function peek($limit = 1) {
-		throw new \TYPO3\FLOW3\Exception('not implemented!', 1334153875);
+		$messages = array();
+
+		try {
+			$pheanstalkJob = $this->client->peekReady();
+		} catch(\Pheanstalk\Exception\ServerException $exception) {
+			return $messages;
+		}
+		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
+			return $messages;
+		}
+
+		$message = $this->decodeMessage($pheanstalkJob->getData());
+		$message->setIdentifier($pheanstalkJob->getId());
+		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED);
+		$messages[] = $message;
+
+		return $messages;
 	}
 
 	/**
