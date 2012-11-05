@@ -1,8 +1,8 @@
 <?php
 namespace TYPO3\Jobqueue\Beanstalkd\Queue;
 
-use TYPO3\FLOW3\Package\Package as BasePackage;
-use TYPO3\FLOW3\Annotations as FLOW3;
+use TYPO3\Flow\Package\Package as BasePackage;
+use TYPO3\Flow\Annotations as Flow;
 
 /**
  * A queue implementation using beanstalkd as the queue backend
@@ -146,7 +146,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * @return integer
 	 */
 	public function count() {
-		throw new \TYPO3\FLOW3\Exception('not implemented!', 1334153878);
+		throw new \TYPO3\Flow\Exception('not implemented!', 1334153878);
 	}
 
 	/**

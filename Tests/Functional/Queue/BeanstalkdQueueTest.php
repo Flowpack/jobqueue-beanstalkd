@@ -14,7 +14,7 @@ namespace TYPO3\Jobqueue\Beanstalkd\Tests\Functional\Queue;
 /**
  * Functional test for BeanstalkdQueue
  */
-class BeanstalkdQueueTest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
+class BeanstalkdQueueTest extends \TYPO3\Flow\Tests\FunctionalTestCase {
 
 	/**
 	 * @var \TYPO3\Jobqueue\Beanstalkd\Queue\BeanstalkdQueue
@@ -31,8 +31,8 @@ class BeanstalkdQueueTest extends \TYPO3\FLOW3\Tests\FunctionalTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$configurationManager = $this->objectManager->get('TYPO3\FLOW3\Configuration\ConfigurationManager');
-		$settings = $configurationManager->getConfiguration(\TYPO3\FLOW3\Configuration\ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'TYPO3.Jobqueue.Beanstalkd');
+		$configurationManager = $this->objectManager->get('TYPO3\Flow\Configuration\ConfigurationManager');
+		$settings = $configurationManager->getConfiguration(\TYPO3\Flow\Configuration\ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'TYPO3.Jobqueue.Beanstalkd');
 		if (!isset($settings['testing']['enabled']) || $settings['testing']['enabled'] !== TRUE) {
 			$this->markTestSkipped('beanstalkd is not configured');
 		}

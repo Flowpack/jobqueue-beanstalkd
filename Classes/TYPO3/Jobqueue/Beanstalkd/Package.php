@@ -1,13 +1,13 @@
 <?php
 namespace TYPO3\Jobqueue\Beanstalkd;
 
-use TYPO3\FLOW3\Package\Package as BasePackage;
-use TYPO3\FLOW3\Annotations as FLOW3;
+use TYPO3\Flow\Package\Package as BasePackage;
+use TYPO3\Flow\Annotations as Flow;
 
 /**
  * Package base class of the TYPO3.Jobqueue.Beanstalkd package.
  *
- * @FLOW3\Scope("singleton")
+ * @Flow\Scope("singleton")
  */
 class Package extends BasePackage {
 
