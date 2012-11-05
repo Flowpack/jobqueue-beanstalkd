@@ -127,19 +127,27 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	public function peek($limit = 1) {
 		$messages = array();
 
-		try {
-			$pheanstalkJob = $this->client->peekReady();
-		} catch(\Pheanstalk_Exception_ServerException $exception) {
-			return $messages;
-		}
-		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
-			return $messages;
-		}
+		$previousMessageId = NULL;
+		for ($i = 0; $i < $limit; $i ++) {
+			try {
+				$pheanstalkJob = $this->client->peekReady();
+			} catch(\Pheanstalk_Exception_ServerException $exception) {
+				return $messages;
+			}
+			if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
+				return $messages;
+			}
 
-		$message = $this->decodeMessage($pheanstalkJob->getData());
-		$message->setIdentifier($pheanstalkJob->getId());
-		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED);
-		$messages[] = $message;
+			$message = $this->decodeMessage($pheanstalkJob->getData());
+			$message->setIdentifier($pheanstalkJob->getId());
+			$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED);
+			$messages[] = $message;
+
+			if ($pheanstalkJob->getId() === $previousMessageId) {
+				break;
+			}
+			$previousMessageId = $pheanstalkJob->getId();
+		}
 
 		return $messages;
 	}
