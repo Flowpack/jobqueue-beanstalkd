@@ -158,7 +158,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * @return integer
 	 */
 	public function count() {
-		throw new \TYPO3\Flow\Exception('not implemented!', 1334153878);
+		return count($this->peek(99999));
 	}
 
 	/**
