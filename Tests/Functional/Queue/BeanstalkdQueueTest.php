@@ -22,7 +22,7 @@ class BeanstalkdQueueTest extends \TYPO3\Flow\Tests\FunctionalTestCase {
 	protected $queue;
 
 	/**
-	 * @var \Pheanstalk\Pheanstalk
+	 * @var \Pheanstalk
 	 */
 	protected $pheanstalk;
 
@@ -42,7 +42,7 @@ class BeanstalkdQueueTest extends \TYPO3\Flow\Tests\FunctionalTestCase {
 		$clientOptions = $settings['testing']['client'];
 		$host = isset($clientOptions['host']) ? $clientOptions['host'] : '127.0.0.1';
 		$port = isset($clientOptions['port']) ? $clientOptions['port'] : '11300';
-		$this->pheanstalk = new \Pheanstalk\Pheanstalk($host, $port);
+		$this->pheanstalk = new \Pheanstalk($host, $port);
 
 			// flush queue:
 		try {

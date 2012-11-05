@@ -17,7 +17,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	protected $name;
 
 	/**
-	 * @var \Pheanstalk\Pheanstalk
+	 * @var \Pheanstalk
 	 */
 	protected $client;
 
@@ -39,9 +39,9 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 		}
 		$clientOptions = isset($options['client']) ? $options['client'] : array();
 		$host = isset($clientOptions['host']) ? $clientOptions['host'] : '127.0.0.1';
-		$port = isset($clientOptions['port']) ? $clientOptions['port'] : \Pheanstalk\Pheanstalk::DEFAULT_PORT;
+		$port = isset($clientOptions['port']) ? $clientOptions['port'] : \Pheanstalk::DEFAULT_PORT;
 
-		$this->client = new \Pheanstalk\Pheanstalk($host, $port, $this->defaultTimeout);
+		$this->client = new \Pheanstalk($host, $port, $this->defaultTimeout);
 	}
 
 	/**
@@ -62,10 +62,12 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * (without safety queue)
 	 *
 	 * @param int $timeout
-	 * @return \TYPO3\Jobqueue\Common\Message The received message or NULL if a timeout occured
+	 * @return \TYPO3\Jobqueue\Common\Queue\Message The received message or NULL if a timeout occurred
 	 */
 	public function waitAndTake($timeout = NULL) {
-		$timeout !== NULL ? $timeout : $this->defaultTimeout;
+		if ($timeout === NULL) {
+			$timeout = $this->defaultTimeout;
+		}
 		$pheanstalkJob = $this->client->reserve($timeout);
 		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
 			return NULL;
@@ -90,7 +92,9 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * @return \TYPO3\Jobqueue\Common\Queue\Message
 	 */
 	public function waitAndReserve($timeout = NULL) {
-		$timeout !== NULL ? $timeout : $this->defaultTimeout;
+		if ($timeout === NULL) {
+			$timeout = $this->defaultTimeout;
+		}
 		$pheanstalkJob = $this->client->reserve($timeout);
 		if ($pheanstalkJob === NULL) {
 			return NULL;
@@ -125,7 +129,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 
 		try {
 			$pheanstalkJob = $this->client->peekReady();
-		} catch(\Pheanstalk\Exception\ServerException $exception) {
+		} catch(\Pheanstalk_Exception_ServerException $exception) {
 			return $messages;
 		}
 		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
