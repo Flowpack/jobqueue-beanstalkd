@@ -5,8 +5,8 @@
     "version": "1.0.0",
     "require": {
         "typo3/flow": "*",
-        "typo3/jobqueue-common": "*",
-        "pda/pheanstalk": "*"
+        "typo3/jobqueue-common": "dev-master",
+        "pda/pheanstalk": "dev-master"
     },
     "autoload": {
         "psr-0": {
