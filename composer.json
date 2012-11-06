@@ -1,11 +1,12 @@
 {
     "name": "typo3/jobqueue-beanstalkd",
     "type": "typo3-flow-package",
-    "description": "Implements concrete Queue for the beanstalkd workqueue. Requires the Pheanstalk package to be installed.",
+    "description": "Implements concrete Queue for the beanstalkd workqueue. Requires the packages typo3/jobqueue-common and pda/pheanstalk package to be installed.",
     "version": "1.0.0",
     "require": {
         "typo3/flow": "*",
-        "pda/pheanstalk": "dev-master"
+        "typo3/jobqueue-common": "*",
+        "pda/pheanstalk": "*"
     },
     "autoload": {
         "psr-0": {
