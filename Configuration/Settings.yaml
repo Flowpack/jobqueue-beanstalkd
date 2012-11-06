@@ -7,3 +7,9 @@ TYPO3:
         client:
           hostname: 127.0.0.1
           port: 11300
+
+  Flow:
+     # disable reflection for non psr-0 compliant pheanstalk package
+    object:
+      excludeClasses:
+       'pda.pheanstalk' : ['Pheanstalk.*']
