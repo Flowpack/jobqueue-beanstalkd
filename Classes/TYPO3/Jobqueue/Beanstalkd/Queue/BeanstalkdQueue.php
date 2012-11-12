@@ -120,36 +120,30 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 
 	/**
 	 * Peek for messages
+	 * NOTE: The beanstalkd implementation only supports to peek the UPCOMING job, so this will throw an exception for
+	 * $limit != 1.
 	 *
 	 * @param integer $limit
 	 * @return array Messages or empty array if no messages were present
+	 * @throws \TYPO3\Jobqueue\Common\Exception
 	 */
 	public function peek($limit = 1) {
-		$messages = array();
-
-		$previousMessageId = NULL;
-		for ($i = 0; $i < $limit; $i ++) {
-			try {
-				$pheanstalkJob = $this->client->peekReady();
-			} catch(\Pheanstalk_Exception_ServerException $exception) {
-				return $messages;
-			}
-			if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
-				return $messages;
-			}
-
-			$message = $this->decodeMessage($pheanstalkJob->getData());
-			$message->setIdentifier($pheanstalkJob->getId());
-			$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED);
-			$messages[] = $message;
-
-			if ($pheanstalkJob->getId() === $previousMessageId) {
-				break;
-			}
-			$previousMessageId = $pheanstalkJob->getId();
+		if ($limit !== 1) {
+			throw new \TYPO3\Jobqueue\Common\Exception('The beanstalkd Jobqueue implementation only supports to peek one job at a time', 1352717703);
+		}
+		try {
+			$pheanstalkJob = $this->client->peekReady();
+		} catch(\Pheanstalk_Exception_ServerException $exception) {
+			return array();
+		}
+		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
+			return array();
 		}
 
-		return $messages;
+		$message = $this->decodeMessage($pheanstalkJob->getData());
+		$message->setIdentifier($pheanstalkJob->getId());
+		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED);
+		return array($message);
 	}
 
 	/**
@@ -158,7 +152,8 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * @return integer
 	 */
 	public function count() {
-		return count($this->peek(99999));
+		$clientStats = $this->client->stats();
+		return $clientStats['current-jobs-ready'];
 	}
 
 	/**
