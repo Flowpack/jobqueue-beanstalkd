@@ -17,7 +17,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	protected $name;
 
 	/**
-	 * @var \Pheanstalk
+	 * @var \Pheanstalk_Pheanstalk
 	 */
 	protected $client;
 
@@ -39,9 +39,9 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 		}
 		$clientOptions = isset($options['client']) ? $options['client'] : array();
 		$host = isset($clientOptions['host']) ? $clientOptions['host'] : '127.0.0.1';
-		$port = isset($clientOptions['port']) ? $clientOptions['port'] : \Pheanstalk::DEFAULT_PORT;
+		$port = isset($clientOptions['port']) ? $clientOptions['port'] : \Pheanstalk_Pheanstalk::DEFAULT_PORT;
 
-		$this->client = new \Pheanstalk($host, $port, $this->defaultTimeout);
+		$this->client = new \Pheanstalk_Pheanstalk($host, $port, $this->defaultTimeout);
 	}
 
 	/**
