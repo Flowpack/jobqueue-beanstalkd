@@ -1,15 +1,17 @@
 <?php
 namespace TYPO3\Jobqueue\Beanstalkd\Queue;
 
-use TYPO3\Flow\Package\Package as BasePackage;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Jobqueue\Common\Exception;
+use TYPO3\Jobqueue\Common\Queue\Message;
+use TYPO3\Jobqueue\Common\Queue\QueueInterface;
 
 /**
  * A queue implementation using beanstalkd as the queue backend
  *
  * Depends on Pheanstalk as the PHP beanstalkd client.
  */
-class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
+class BeanstalkdQueue implements QueueInterface {
 
 	/**
 	 * @var string
@@ -27,8 +29,6 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	protected $defaultTimeout = NULL;
 
 	/**
-	 * Constructor
-	 *
 	 * @param string $name
 	 * @param array $options
 	 */
@@ -47,14 +47,14 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	/**
 	 * Publish a message to the queue
 	 *
-	 * @param \TYPO3\Jobqueue\Common\Queue\Message $message
+	 * @param Message $message
 	 * @return void
 	 */
-	public function publish(\TYPO3\Jobqueue\Common\Queue\Message $message) {
+	public function publish(Message $message) {
 		$encodedMessage = $this->encodeMessage($message);
-		$messageIdentifier = $this->client->put($encodedMessage);
+		$messageIdentifier = $this->client->putInTube($this->name, $encodedMessage);
 		$message->setIdentifier($messageIdentifier);
-		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED);
+		$message->setState(Message::STATE_PUBLISHED);
 	}
 
 	/**
@@ -62,20 +62,20 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * (without safety queue)
 	 *
 	 * @param int $timeout
-	 * @return \TYPO3\Jobqueue\Common\Queue\Message The received message or NULL if a timeout occurred
+	 * @return Message The received message or NULL if a timeout occurred
 	 */
 	public function waitAndTake($timeout = NULL) {
 		if ($timeout === NULL) {
 			$timeout = $this->defaultTimeout;
 		}
-		$pheanstalkJob = $this->client->reserve($timeout);
+		$pheanstalkJob = $this->client->reserveFromTube($this->name, $timeout);
 		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
 			return NULL;
 		}
 		$message = $this->decodeMessage($pheanstalkJob->getData());
 		$message->setIdentifier($pheanstalkJob->getId());
 		$this->client->delete($pheanstalkJob);
-		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_DONE);
+		$message->setState(Message::STATE_DONE);
 		return $message;
 
 	}
@@ -89,14 +89,14 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * the run start time in the message, so separate keys should be used for this.
 	 *
 	 * @param int $timeout
-	 * @return \TYPO3\Jobqueue\Common\Queue\Message
+	 * @return Message
 	 */
 	public function waitAndReserve($timeout = NULL) {
 		if ($timeout === NULL) {
 			$timeout = $this->defaultTimeout;
 		}
-		$pheanstalkJob = $this->client->reserve($timeout);
-		if ($pheanstalkJob === NULL) {
+		$pheanstalkJob = $this->client->reserveFromTube($this->name, $timeout);
+		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {
 			return NULL;
 		}
 		$message = $this->decodeMessage($pheanstalkJob->getData());
@@ -107,14 +107,14 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	/**
 	 * Mark a message as finished
 	 *
-	 * @param \TYPO3\Jobqueue\Common\Queue\Message $message
+	 * @param Message $message
 	 * @return boolean TRUE if the message could be removed
 	 */
-	public function finish(\TYPO3\Jobqueue\Common\Queue\Message $message) {
+	public function finish(Message $message) {
 		$messageIdentifier = $message->getIdentifier();
 		$pheanstalkJob = $this->client->peek($messageIdentifier);
 		$this->client->delete($pheanstalkJob);
-		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_DONE);
+		$message->setState(Message::STATE_DONE);
 		return TRUE;
 	}
 
@@ -125,14 +125,14 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 *
 	 * @param integer $limit
 	 * @return array Messages or empty array if no messages were present
-	 * @throws \TYPO3\Jobqueue\Common\Exception
+	 * @throws Exception
 	 */
 	public function peek($limit = 1) {
 		if ($limit !== 1) {
-			throw new \TYPO3\Jobqueue\Common\Exception('The beanstalkd Jobqueue implementation only supports to peek one job at a time', 1352717703);
+			throw new Exception('The beanstalkd Jobqueue implementation currently only supports to peek one job at a time', 1352717703);
 		}
 		try {
-			$pheanstalkJob = $this->client->peekReady();
+			$pheanstalkJob = $this->client->peekReady($this->name);
 		} catch(\Pheanstalk_Exception_ServerException $exception) {
 			return array();
 		}
@@ -142,7 +142,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 
 		$message = $this->decodeMessage($pheanstalkJob->getData());
 		$message->setIdentifier($pheanstalkJob->getId());
-		$message->setState(\TYPO3\Jobqueue\Common\Queue\Message::STATE_PUBLISHED);
+		$message->setState(Message::STATE_PUBLISHED);
 		return array($message);
 	}
 
@@ -152,8 +152,8 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * @return integer
 	 */
 	public function count() {
-		$clientStats = $this->client->stats();
-		return $clientStats['current-jobs-ready'];
+		$clientStats = $this->client->statsTube($this->name);
+		return (integer)$clientStats['current-jobs-ready'];
 	}
 
 	/**
@@ -162,10 +162,10 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * Updates the original value property of the message to resemble the
 	 * encoded representation.
 	 *
-	 * @param \TYPO3\Jobqueue\Common\Queue\Message $message
+	 * @param Message $message
 	 * @return string
 	 */
-	protected function encodeMessage(\TYPO3\Jobqueue\Common\Queue\Message $message) {
+	protected function encodeMessage(Message $message) {
 		$value = json_encode($message->toArray());
 		$message->setOriginalValue($value);
 		return $value;
@@ -175,11 +175,11 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	 * Decode a message from a string representation
 	 *
 	 * @param string $value
-	 * @return \TYPO3\Jobqueue\Common\Queue\Message
+	 * @return Message
 	 */
 	protected function decodeMessage($value) {
 		$decodedMessage = json_decode($value, TRUE);
-		$message = new \TYPO3\Jobqueue\Common\Queue\Message($decodedMessage['payload']);
+		$message = new Message($decodedMessage['payload']);
 		if (isset($decodedMessage['identifier'])) {
 			$message->setIdentifier($decodedMessage['identifier']);
 		}
@@ -190,7 +190,7 @@ class BeanstalkdQueue implements \TYPO3\Jobqueue\Common\Queue\QueueInterface {
 	/**
 	 *
 	 * @param string $identifier
-	 * @return \TYPO3\Jobqueue\Common\Queue\Message
+	 * @return Message
 	 */
 	public function getMessage($identifier) {
 		$pheanstalkJob = $this->client->peek($identifier);
