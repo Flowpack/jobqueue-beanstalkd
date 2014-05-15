@@ -1,15 +1,15 @@
 <?php
 namespace TYPO3\Jobqueue\Beanstalkd\Tests\Functional\Queue;
 
-/*                                                                        *
- * This script belongs to the FLOW3 package "Jobqueue.Beanstalkd".                *
- *                                                                        *
- * It is free software; you can redistribute it and/or modify it under    *
- * the terms of the GNU General Public License, either version 3 of the   *
- * License, or (at your option) any later version.                        *
- *                                                                        *
- * The TYPO3 project - inspiring people to share!                         *
- *                                                                        */
+/*                                                                            *
+ * This script belongs to the TYPO3 Flow package "TYPO3.Jobqueue.Beanstalkd". *
+ *                                                                            *
+ * It is free software; you can redistribute it and/or modify it under        *
+ * the terms of the GNU General Public License, either version 3 of the       *
+ * License, or (at your option) any later version.                            *
+ *                                                                            *
+ * The TYPO3 project - inspiring people to share!                             *
+ *                                                                            */
 
 use TYPO3\Flow\Configuration\ConfigurationManager;
 use TYPO3\Flow\Tests\FunctionalTestCase;
@@ -27,7 +27,7 @@ class BeanstalkdQueueTest extends FunctionalTestCase {
 	protected $queue;
 
 	/**
-	 * @var \Pheanstalk
+	 * @var \Pheanstalk_Pheanstalk
 	 */
 	protected $pheanstalk;
 
@@ -164,4 +164,3 @@ class BeanstalkdQueueTest extends FunctionalTestCase {
 	}
 
 }
-?>

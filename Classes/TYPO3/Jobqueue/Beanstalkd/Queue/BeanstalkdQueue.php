@@ -1,8 +1,18 @@
 <?php
 namespace TYPO3\Jobqueue\Beanstalkd\Queue;
 
+/*                                                                            *
+ * This script belongs to the TYPO3 Flow package "TYPO3.Jobqueue.Beanstalkd". *
+ *                                                                            *
+ * It is free software; you can redistribute it and/or modify it under        *
+ * the terms of the GNU General Public License, either version 3 of the       *
+ * License, or (at your option) any later version.                            *
+ *                                                                            *
+ * The TYPO3 project - inspiring people to share!                             *
+ *                                                                            */
+
 use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Jobqueue\Common\Exception;
+use TYPO3\Jobqueue\Common\Exception as JobqueueException;
 use TYPO3\Jobqueue\Common\Queue\Message;
 use TYPO3\Jobqueue\Common\Queue\QueueInterface;
 
@@ -24,6 +34,8 @@ class BeanstalkdQueue implements QueueInterface {
 	protected $client;
 
 	/**
+	 * Default connect timeout in seconds
+	 *
 	 * @var integer
 	 */
 	protected $defaultTimeout = NULL;
@@ -61,7 +73,7 @@ class BeanstalkdQueue implements QueueInterface {
 	 * Wait for a message in the queue and return the message for processing
 	 * (without safety queue)
 	 *
-	 * @param int $timeout
+	 * @param integer $timeout in seconds
 	 * @return Message The received message or NULL if a timeout occurred
 	 */
 	public function waitAndTake($timeout = NULL) {
@@ -88,7 +100,7 @@ class BeanstalkdQueue implements QueueInterface {
 	 * queued item on transfer to the safety queue and we cannot update a timestamp to mark
 	 * the run start time in the message, so separate keys should be used for this.
 	 *
-	 * @param int $timeout
+	 * @param integer $timeout in seconds
 	 * @return Message
 	 */
 	public function waitAndReserve($timeout = NULL) {
@@ -125,11 +137,11 @@ class BeanstalkdQueue implements QueueInterface {
 	 *
 	 * @param integer $limit
 	 * @return array Messages or empty array if no messages were present
-	 * @throws Exception
+	 * @throws JobqueueException
 	 */
 	public function peek($limit = 1) {
 		if ($limit !== 1) {
-			throw new Exception('The beanstalkd Jobqueue implementation currently only supports to peek one job at a time', 1352717703);
+			throw new JobqueueException('The beanstalkd Jobqueue implementation currently only supports to peek one job at a time', 1352717703);
 		}
 		try {
 			$pheanstalkJob = $this->client->peekReady($this->name);
@@ -199,4 +211,3 @@ class BeanstalkdQueue implements QueueInterface {
 
 
 }
-?>
