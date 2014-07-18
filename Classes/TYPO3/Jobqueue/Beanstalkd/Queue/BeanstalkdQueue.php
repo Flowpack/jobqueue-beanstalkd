@@ -11,6 +11,9 @@ namespace TYPO3\Jobqueue\Beanstalkd\Queue;
  * The TYPO3 project - inspiring people to share!                             *
  *                                                                            */
 
+use Pheanstalk\Exception\ServerException;
+use Pheanstalk\Pheanstalk;
+use Pheanstalk\PheanstalkInterface;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Jobqueue\Common\Exception as JobqueueException;
 use TYPO3\Jobqueue\Common\Queue\Message;
@@ -29,7 +32,7 @@ class BeanstalkdQueue implements QueueInterface {
 	protected $name;
 
 	/**
-	 * @var \Pheanstalk_Pheanstalk
+	 * @var Pheanstalk
 	 */
 	protected $client;
 
@@ -51,9 +54,9 @@ class BeanstalkdQueue implements QueueInterface {
 		}
 		$clientOptions = isset($options['client']) ? $options['client'] : array();
 		$host = isset($clientOptions['host']) ? $clientOptions['host'] : '127.0.0.1';
-		$port = isset($clientOptions['port']) ? $clientOptions['port'] : \Pheanstalk_Pheanstalk::DEFAULT_PORT;
+		$port = isset($clientOptions['port']) ? $clientOptions['port'] : PheanstalkInterface::DEFAULT_PORT;
 
-		$this->client = new \Pheanstalk_Pheanstalk($host, $port, $this->defaultTimeout);
+		$this->client = new Pheanstalk($host, $port, $this->defaultTimeout);
 	}
 
 	/**
@@ -145,7 +148,7 @@ class BeanstalkdQueue implements QueueInterface {
 		}
 		try {
 			$pheanstalkJob = $this->client->peekReady($this->name);
-		} catch(\Pheanstalk_Exception_ServerException $exception) {
+		} catch(ServerException $exception) {
 			return array();
 		}
 		if ($pheanstalkJob === NULL || $pheanstalkJob === FALSE) {

@@ -11,6 +11,7 @@ namespace TYPO3\Jobqueue\Beanstalkd\Tests\Functional\Queue;
  * The TYPO3 project - inspiring people to share!                             *
  *                                                                            */
 
+use Pheanstalk\Pheanstalk;
 use TYPO3\Flow\Configuration\ConfigurationManager;
 use TYPO3\Flow\Tests\FunctionalTestCase;
 use TYPO3\Jobqueue\Beanstalkd\Queue\BeanstalkdQueue;
@@ -27,9 +28,9 @@ class BeanstalkdQueueTest extends FunctionalTestCase {
 	protected $queue;
 
 	/**
-	 * @var \Pheanstalk_Pheanstalk
+	 * @var Pheanstalk
 	 */
-	protected $pheanstalk;
+	protected $client;
 
 	/**
 	 * Set up dependencies
@@ -39,7 +40,7 @@ class BeanstalkdQueueTest extends FunctionalTestCase {
 		$configurationManager = $this->objectManager->get('TYPO3\Flow\Configuration\ConfigurationManager');
 		$settings = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'TYPO3.Jobqueue.Beanstalkd');
 		if (!isset($settings['testing']['enabled']) || $settings['testing']['enabled'] !== TRUE) {
-			$this->markTestSkipped('beanstalkd is not configured');
+			$this->markTestSkipped('beanstalkd is not configured (TYPO3.Jobqueue.Beanstalkd.testing.enabled != TRUE)');
 		}
 
 		$queueName = 'Test-queue';
@@ -48,27 +49,27 @@ class BeanstalkdQueueTest extends FunctionalTestCase {
 		$clientOptions = $settings['testing']['client'];
 		$host = isset($clientOptions['host']) ? $clientOptions['host'] : '127.0.0.1';
 		$port = isset($clientOptions['port']) ? $clientOptions['port'] : '11300';
-		$this->pheanstalk = new \Pheanstalk_Pheanstalk($host, $port);
+		$this->client = new Pheanstalk($host, $port);
 
 			// flush queue:
 		try {
 			while (true) {
-				$job = $this->pheanstalk->peekDelayed($queueName);
-				$this->pheanstalk->delete($job);
+				$job = $this->client->peekDelayed($queueName);
+				$this->client->delete($job);
 			}
 		} catch (\Exception $e) {
 		}
 		try {
 			while (true) {
-				$job = $this->pheanstalk->peekBuried($queueName);
-				$this->pheanstalk->delete($job);
+				$job = $this->client->peekBuried($queueName);
+				$this->client->delete($job);
 			}
 		} catch (\Exception $e) {
 		}
 		try {
 			while (true) {
-				$job = $this->pheanstalk->peekReady($queueName);
-				$this->pheanstalk->delete($job);
+				$job = $this->client->peekReady($queueName);
+				$this->client->delete($job);
 			}
 		} catch (\Exception $e) {
 		}

@@ -6,7 +6,7 @@
     "require": {
         "typo3/flow": "*",
         "typo3/jobqueue-common": "dev-master",
-        "pda/pheanstalk": "dev-master"
+        "pda/pheanstalk": "3.0.*"
     },
     "autoload": {
         "psr-0": {
