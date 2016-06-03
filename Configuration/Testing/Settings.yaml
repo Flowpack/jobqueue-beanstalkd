@@ -1,5 +1,5 @@
-TYPO3:
-  Jobqueue:
+Flowpack:
+  JobQueue:
     Beanstalkd:
       testing:
         # Set to TRUE to enable functional testing against a beanstalkd server
