@@ -2,13 +2,14 @@
     "name": "flowpack/jobqueue-beanstalkd",
     "type": "typo3-flow-package",
     "description": "Implements concrete Queue for the beanstalkd work queue. Requires the packages flowpack/jobqueue-common and pda/pheanstalk package to be installed.",
+    "license": "MIT",
     "require": {
         "flowpack/jobqueue-common": "*",
         "pda/pheanstalk": "3.0.*"
     },
     "autoload": {
-        "psr-0": {
-            "Flowpack\\JobQueue\\Beanstalkd": "Classes"
+        "psr-4": {
+            "Flowpack\\JobQueue\\Beanstalkd\\": "Classes"
         }
     }
 }
