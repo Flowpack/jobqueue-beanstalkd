@@ -103,9 +103,7 @@ class BeanstalkdQueue implements QueueInterface
      * Wait for a message in the queue and save the message to a safety queue
      *
      * TODO: Idea for implementing a TTR (time to run) with monitoring of safety queue. E.g.
-     * use different queue names with encoded times? With brpoplpush we cannot modify the
-     * queued item on transfer to the safety queue and we cannot update a timestamp to mark
-     * the run start time in the message, so separate keys should be used for this.
+     * use different queue names with encoded times?
      *
      * @param integer $timeout in seconds
      * @return Message
