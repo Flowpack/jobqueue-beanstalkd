@@ -1,7 +1,7 @@
 {
     "name": "flowpack/jobqueue-beanstalkd",
     "type": "typo3-flow-package",
-    "description": "Implements concrete Queue for the beanstalkd workqueue. Requires the packages flowpack/jobqueue-common and pda/pheanstalk package to be installed.",
+    "description": "Implements concrete Queue for the beanstalkd work queue. Requires the packages flowpack/jobqueue-common and pda/pheanstalk package to be installed.",
     "require": {
         "flowpack/jobqueue-common": "*",
         "pda/pheanstalk": "3.0.*"
