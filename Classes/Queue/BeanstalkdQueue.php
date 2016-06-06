@@ -173,8 +173,12 @@ class BeanstalkdQueue implements QueueInterface
      */
     public function count()
     {
-        $clientStats = $this->client->statsTube($this->name);
-        return (integer)$clientStats['current-jobs-ready'];
+        try {
+            $clientStats = $this->client->statsTube($this->name);
+            return (integer)$clientStats['current-jobs-ready'];
+        } catch (ServerException $exception) {
+            return 0;
+        }
     }
 
     /**
