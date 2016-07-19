@@ -12,7 +12,6 @@ namespace Flowpack\JobQueue\Beanstalkd\Tests\Unit\Queue;
  */
 
 use Flowpack\JobQueue\Beanstalkd\Queue\BeanstalkdQueue;
-use Flowpack\JobQueue\Common\Queue\Message;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\PheanstalkInterface;
 use TYPO3\Flow\Tests\UnitTestCase;
@@ -33,19 +32,12 @@ class BeanstalkdQueueTest extends UnitTestCase
      */
     protected $mockClient;
 
-    /**
-     * @var Message|\PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $mockMessage;
-
     public function setUp()
     {
         $this->beanstalkdQueue = new BeanstalkdQueue('TestQueue');
 
         $this->mockClient = $this->getMockBuilder(Pheanstalk::class)->disableOriginalConstructor()->getMock();
         $this->inject($this->beanstalkdQueue, 'client', $this->mockClient);
-
-        $this->mockMessage = $this->getMockBuilder(Message::class)->disableOriginalConstructor()->getMock();
     }
 
     /**
@@ -58,23 +50,9 @@ class BeanstalkdQueueTest extends UnitTestCase
             'payload' => 'somePayload'
         ];
         $encodedMessage = json_encode($messageData);
-        $this->mockMessage->expects($this->atLeastOnce())->method('encode')->will($this->returnValue($encodedMessage));
 
         $this->mockClient->expects($this->once())->method('putInTube')->with('TestQueue', $encodedMessage);
-        $this->beanstalkdQueue->submit($this->mockMessage);
-    }
-
-
-    /**
-     * @test
-     */
-    public function submitSetsMessageIdentifier()
-    {
-        $someIdentifier = 12345;
-        $this->mockClient->expects($this->once())->method('putInTube')->will($this->returnValue($someIdentifier));
-
-        $this->mockMessage->expects($this->once())->method('setIdentifier')->with($someIdentifier);
-        $this->beanstalkdQueue->submit($this->mockMessage);
+        $this->beanstalkdQueue->submit($messageData);
     }
 
     /**
@@ -84,7 +62,7 @@ class BeanstalkdQueueTest extends UnitTestCase
     {
         $somePriority = 1337;
         $this->mockClient->expects($this->once())->method('putInTube')->with(new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), $somePriority);
-        $this->beanstalkdQueue->submit($this->mockMessage, ['priority' => $somePriority]);
+        $this->beanstalkdQueue->submit('somePayload', ['priority' => $somePriority]);
     }
 
     /**
@@ -93,7 +71,7 @@ class BeanstalkdQueueTest extends UnitTestCase
     public function submitSetsDefaultPriorityIfNotSpecified()
     {
         $this->mockClient->expects($this->once())->method('putInTube')->with(new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), PheanstalkInterface::DEFAULT_PRIORITY);
-        $this->beanstalkdQueue->submit($this->mockMessage);
+        $this->beanstalkdQueue->submit('somePayload');
     }
 
     /**
@@ -103,7 +81,7 @@ class BeanstalkdQueueTest extends UnitTestCase
     {
         $someDelay = 42;
         $this->mockClient->expects($this->once())->method('putInTube')->with(new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), $someDelay);
-        $this->beanstalkdQueue->submit($this->mockMessage, ['delay' => $someDelay]);
+        $this->beanstalkdQueue->submit('somePayload', ['delay' => $someDelay]);
     }
 
     /**
@@ -112,7 +90,7 @@ class BeanstalkdQueueTest extends UnitTestCase
     public function submitSetsDefaultDelayIfNotSpecified()
     {
         $this->mockClient->expects($this->once())->method('putInTube')->with(new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), PheanstalkInterface::DEFAULT_DELAY);
-        $this->beanstalkdQueue->submit($this->mockMessage);
+        $this->beanstalkdQueue->submit('somePayload');
     }
 
 
@@ -123,7 +101,7 @@ class BeanstalkdQueueTest extends UnitTestCase
     {
         $someTtr = 123;
         $this->mockClient->expects($this->once())->method('putInTube')->with(new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), $someTtr);
-        $this->beanstalkdQueue->submit($this->mockMessage, ['ttr' => $someTtr]);
+        $this->beanstalkdQueue->submit('somePayload', ['ttr' => $someTtr]);
     }
 
     /**
@@ -132,6 +110,6 @@ class BeanstalkdQueueTest extends UnitTestCase
     public function submitSetsDefaultTtrIfNotSpecified()
     {
         $this->mockClient->expects($this->once())->method('putInTube')->with(new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), new \PHPUnit_Framework_Constraint_IsAnything(), PheanstalkInterface::DEFAULT_TTR);
-        $this->beanstalkdQueue->submit($this->mockMessage);
+        $this->beanstalkdQueue->submit('somePayload');
     }
 }

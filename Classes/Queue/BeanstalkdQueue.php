@@ -110,8 +110,8 @@ class BeanstalkdQueue implements QueueInterface
             return null;
         }
         $pheanstalkJobStats = $this->client->statsJob($pheanstalkJob);
-        $numberOfFailures = isset($pheanstalkJobStats['reserves']) && $pheanstalkJobStats['reserves'] > 0 ? (integer)$pheanstalkJobStats['reserves'] - 1 : 0;
-        return new Message((string)$pheanstalkJob->getId(), json_decode($pheanstalkJob->getData(), true), $numberOfFailures);
+        $numberOfReleases = isset($pheanstalkJobStats['reserves']) && $pheanstalkJobStats['reserves'] > 0 ? (integer)$pheanstalkJobStats['reserves'] - 1 : 0;
+        return new Message((string)$pheanstalkJob->getId(), json_decode($pheanstalkJob->getData(), true), $numberOfReleases);
     }
 
     /**
