@@ -10,7 +10,8 @@ Install the package using composer:
 composer require flowpack/jobqueue-beanstalkd
 ```
 
-If not already installed, that fetch its requirements, namely `jobqueue-common` and `pda/pheanstalk`.
+If not already installed, that will fetch its requirements, namely `jobqueue-common` and `pda/pheanstalk`.
+*NOTE:* This package needs a running [beanstalkd](http://kr.github.io/beanstalkd/) server
 
 Now the queue can be configured like this:
 
@@ -40,8 +41,6 @@ The `BeanstalkdQueue` supports following options:
 | ----------------------- |---------| ----------------------------------------:| ---------------------------------------- |
 | defaultTimeout          | integer | 60                                       | Number of seconds new messages are waited for before a timeout occurs (This is overridden by a "timeout" argument in the `waitAndTake()` and `waitAndReserve()` methods |
 | client                  | array   | ['host' => '127.0.0.1', 'port' => 11300] | Beanstalkd connection settings |
-
-*NOTE:* The `DoctrineQueue` currently supports `MySQL`, `PostgreSQL` and `SQLite` backends. You can specify the backend via the `backendOptions`. If you omit this setting, the *current connection* will be re-used (i.e. the currently active Flow database).
 
 ### Submit options
 
