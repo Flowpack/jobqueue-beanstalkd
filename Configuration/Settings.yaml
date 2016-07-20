@@ -1,6 +1,0 @@
-TYPO3:
-  Flow:
-     # disable reflection for non psr-0 compliant pheanstalk package
-    object:
-      excludeClasses:
-       'pda.pheanstalk' : ['Pheanstalk.*']
