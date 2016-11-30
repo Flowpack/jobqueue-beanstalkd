@@ -14,7 +14,7 @@ namespace Flowpack\JobQueue\Beanstalkd\Tests\Unit\Queue;
 use Flowpack\JobQueue\Beanstalkd\Queue\BeanstalkdQueue;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\PheanstalkInterface;
-use TYPO3\Flow\Tests\UnitTestCase;
+use Neos\Flow\Tests\UnitTestCase;
 
 /**
  * Queue manager
