@@ -18,7 +18,7 @@ use Pheanstalk\Exception as PheanstalkException;
 use Pheanstalk\Exception\ServerException;
 use Pheanstalk\Pheanstalk;
 use Pheanstalk\PheanstalkInterface;
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * A queue implementation using beanstalkd as the queue backend
