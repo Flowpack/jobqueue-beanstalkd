@@ -56,7 +56,8 @@
             "TYPO3.Neos-20141218134700",
             "TYPO3.Neos-20150303231600",
             "TYPO3.TYPO3CR-20150510103823",
-            "Neos.Twitter.Bootstrap-20161124204912"
+            "Neos.Twitter.Bootstrap-20161124204912",
+            "Neos.Form-20161124205254"
         ]
     }
 }
