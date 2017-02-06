@@ -44,7 +44,8 @@
             "Neos.Flow-20161125124112",
             "TYPO3.FluidAdaptor-20161130112935",
             "TYPO3.TypoScript-130516234520",
-            "TYPO3.TypoScript-130516235550"
+            "TYPO3.TypoScript-130516235550",
+            "TYPO3.TYPO3CR-130523180140"
         ]
     }
 }
