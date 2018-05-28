@@ -4,7 +4,7 @@
     "description": "Implements concrete Queue for the beanstalkd work queue. Requires the packages flowpack/jobqueue-common and pda/pheanstalk package to be installed.",
     "license": "MIT",
     "require": {
-        "flowpack/jobqueue-common": "*",
+        "flowpack/jobqueue-common": "<3.0.0",
         "pda/pheanstalk": "3.0.*"
     },
     "autoload": {
