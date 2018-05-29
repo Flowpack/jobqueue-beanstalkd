@@ -170,11 +170,37 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function count()
+    public function countReady(): int
     {
         try {
             $clientStats = $this->client->statsTube($this->name);
             return (integer)$clientStats['current-jobs-ready'];
+        } catch (PheanstalkException $exception) {
+            return 0;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function countReserved(): int
+    {
+        try {
+            $clientStats = $this->client->statsTube($this->name);
+            return (integer)$clientStats['current-jobs-reserved'];
+        } catch (PheanstalkException $exception) {
+            return 0;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function countFailed(): int
+    {
+        try {
+            $clientStats = $this->client->statsTube($this->name);
+            return (integer)$clientStats['current-jobs-buried'];
         } catch (PheanstalkException $exception) {
             return 0;
         }
