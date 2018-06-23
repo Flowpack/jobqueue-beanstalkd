@@ -65,7 +65,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -73,7 +73,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function submit($payload, array $options = [])
+    public function submit($payload, array $options = []): string
     {
         $priority = isset($options['priority']) ? (integer)$options['priority'] : PheanstalkInterface::DEFAULT_PRIORITY;
         $delay = isset($options['delay']) ? (integer)$options['delay'] : PheanstalkInterface::DEFAULT_DELAY;
@@ -84,7 +84,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function waitAndTake($timeout = null)
+    public function waitAndTake(?int $timeout = null): ?Message
     {
         if ($timeout === null) {
             $timeout = $this->defaultTimeout;
@@ -100,7 +100,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function waitAndReserve($timeout = null)
+    public function waitAndReserve(?int $timeout = null): ?Message
     {
         if ($timeout === null) {
             $timeout = $this->defaultTimeout;
@@ -117,7 +117,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function release($messageId, array $options = [])
+    public function release(string $messageId, array $options = []): void
     {
         $pheanstalkJob = $this->client->peek((integer)$messageId);
         $priority = isset($options['priority']) ? $options['priority'] : PheanstalkInterface::DEFAULT_PRIORITY;
@@ -128,7 +128,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function abort($messageId)
+    public function abort(string $messageId): void
     {
         $pheanstalkJob = $this->client->peek((integer)$messageId);
         $this->client->bury($pheanstalkJob);
@@ -137,7 +137,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function finish($messageId)
+    public function finish(string $messageId): bool
     {
         $pheanstalkJob = $this->client->peek((integer)$messageId);
         $this->client->delete($pheanstalkJob);
@@ -150,7 +150,7 @@ class BeanstalkdQueue implements QueueInterface
      *
      * @throws JobQueueException
      */
-    public function peek($limit = 1)
+    public function peek(int $limit = 1): array
     {
         if ($limit !== 1) {
             throw new JobQueueException('The beanstalkd Jobqueue implementation currently only supports to peek one job at a time', 1352717703);
@@ -209,7 +209,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->client->useTube($this->name);
     }
@@ -217,7 +217,7 @@ class BeanstalkdQueue implements QueueInterface
     /**
      * @inheritdoc
      */
-    public function flush()
+    public function flush(): void
     {
         try {
             while (true) {
